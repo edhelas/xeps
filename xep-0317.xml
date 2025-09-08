@@ -63,24 +63,24 @@
 </section1>
 
 <section1 topic='Discovery' anchor='disco'>
-  <p>A MUC service that supports hats MUST advertise a &xep0030; feature of "urn:xmpp:hats:0" to the requesting entity.</p>
+  <p>A room in a MUC service that supports hats MUST advertise a &xep0030; feature of "urn:xmpp:hats:0" to the requesting entity.</p>
 
   <p>The "hat list" and all associated commands are OPTIONAL. Some of the commands might be restricted by some business logic or internal rules (such as a LDAP configuration where the hats are already preconfigured).</p>
 
   <p>If the room has a list of hats configured, it should advertise it in its 'muc#roominfo' extension form by computing a unique hash based on the list of hats URIs provided. The way the hash is computed is left to the implementer.</p>
 
-  <example caption='User’s client discovers the hat features of a MUC service'><![CDATA[
-<iq type='get'
+  <example caption='User’s client discovers the hat features of a MUC room'><![CDATA[
+<iq from='professor@example.edu/office'
     id='p87Ne'
-    from='romeo@montague.example.net/garden'
-    to='physicsforpoets@courses.example.edu'>
+    to='physicsforpoets@courses.example.edu'
+    type='get'>
   <query xmlns='http://jabber.org/protocol/disco#info'/>
 </iq>]]></example>
     <example caption='Room advertises hats support'><![CDATA[
-<iq type='result'
+<iq from='physicsforpoets@courses.example.edu'
     id='p87Ne'
-    to='romeo@montague.example.net/garden'
-    from='physicsforpoets@courses.example.edu'>
+    to='professor@example.edu/office'
+    type='result'>
   <query xmlns='http://jabber.org/protocol/disco#info'>
     <identity
         category='conference'
@@ -108,7 +108,7 @@
   <section2 topic='Listing Hats'>
     <p>An entity might be interested to get all the existing hats available in a chatroom.</p>
 
-    <example caption='User’s client request the hats list configured on a MUC service'><![CDATA[
+    <example caption='User’s client request the hats list configured on a MUC room'><![CDATA[
 <iq from='professor@example.edu/office'
   id='fdi3n2b6'
   to='physicsforpoets@courses.example.edu'
@@ -118,7 +118,7 @@
           action='execute'
           node='urn:xmpp:hats:commands:list'/>
 </iq>]]></example>
-    <example caption='Service returns the list of configured hats'><![CDATA[
+    <example caption='Room returns the list of configured hats'><![CDATA[
 <iq from='physicsforpoets@courses.example.edu'
     id='fdi3n2b6'
     to='professor@example.edu/office'
@@ -193,7 +193,7 @@
   <section2 topic='Creating and Updating a Hat' anchor='create'>
     <p>Hats are created and destroyed using &xep0050;.</p>
     <p>The following flow shows how to create a hat.</p>
-    <p>Updating a hat follows the same flow but set an existing "hats#uri". If a hat is updated the service SHOULD broadcast the related JID presences with the refreshed hat list.</p>
+    <p>Updating a hat follows the same flow but set an existing "hats#uri". If a hat is updated the room SHOULD broadcast the related JID presences with the refreshed hat list.</p>
     <example caption='Admin Requests to Create a Hat'><![CDATA[
 <iq from='professor@example.edu/office'
     id='gd53a2b6'
@@ -206,7 +206,7 @@
 </iq>
 ]]></example>
 
-    <example caption='Service Returns Form to Admin'><![CDATA[
+    <example caption='Room Returns Form to Admin'><![CDATA[
 <iq from='physicsforpoets@courses.example.edu'
     id='gd53a2b6'
     to='professor@example.edu/office'
@@ -224,7 +224,7 @@
       </field>
       <field var='hats#title'
             type='text-single'
-            label='Hat title'>
+            label='Hat Title'>
         <required/>
       </field>
       <field var='hats#uri'
@@ -265,7 +265,7 @@
   </command>
 </iq>
 ]]></example>
-    <example caption='Service Informs Admin of Completion'><![CDATA[
+    <example caption='Room Informs Admin of Completion'><![CDATA[
 <iq from='physicsforpoets@courses.example.edu'
     id='9fets723'
     to='professor@example.edu/office'
@@ -277,7 +277,7 @@
             status='completed'/>
 </iq>
 ]]></example>
-  <p>When any change is applied to the hats list the room should SHOULD broadcast a notification that the configuration changed to all users present.</p>
+  <p>When any change is applied to the hats list the room SHOULD broadcast a notification that the configuration changed to all users present.</p>
   <example caption='Room broadcasts a configuration change'><![CDATA[
 <message type='groupchat'
       to='professor@example.edu/office'
@@ -299,7 +299,7 @@
   <section2 topic='Destroying a Hat' anchor='destroy'>
     <p>The following flow shows how to destroy a hat and remove it from the list of available hats.</p>
     <p>When a hat is destroyed, it is automatically removed from all the JIDs where it was assigned.</p>
-    <p>The service SHOULD broadcast the related JID presences with the refreshed hats list.</p>
+    <p>The room SHOULD broadcast the related JID presences with the refreshed hats list.</p>
     <example caption='Admin Requests to Destroy a Hat'><![CDATA[
 <iq from='professor@example.edu/office'
     id='rei4n2b0'
@@ -313,14 +313,14 @@
       <field type='hidden' var='FORM_TYPE'>
         <value>urn:xmpp:hats:commands</value>
       </field>
-      <field var='hat'>
+      <field var='hats#uri'>
         <value>http://tech.example.edu/hats#TeacherAssistant</value>
       </field>
     </x>
   </command>
 </iq>
 ]]></example>
-    <example caption='Service Informs Admin of Completion'><![CDATA[
+    <example caption='Room Informs Admin of Completion'><![CDATA[
 <iq from='physicsforpoets@courses.example.edu'
     id='rei4n2b0'
     to='professor@example.edu/office'
@@ -347,8 +347,8 @@
            node='urn:xmpp:hats:commands:assign'/>
 </iq>
 ]]></example>
-    <p>Unless an error occurs, the service returns the appropriate form.</p>
-    <example caption='Service Returns Form to Admin'><![CDATA[
+    <p>Unless an error occurs, the room returns the appropriate form.</p>
+    <example caption='Room Returns Form to Admin'><![CDATA[
 <iq from='physicsforpoets@courses.example.edu'
     id='fdi3n2b6'
     to='professor@example.edu/office'
@@ -371,7 +371,7 @@
       </field>
       <field label='The role'
              type='list-single'
-             var='hat'>
+             var='hats#uri'>
         <option label='Teacher'><value>http://tech.example.edu/hats#Teacher</value></option>
         <option label='Teacher&apos;s Assistant'><value>http://tech.example.edu/hats#TeacherAssistant</value></option>
         <option label='Test Proctor'><value>http://tech.example.edu/hats#Proctor</value></option>
@@ -396,14 +396,14 @@
       <field var='hats#jid'>
         <value>terry.anderson@example.edu</value>
       </field>
-      <field var='hat'>
+      <field var='hats#uri'>
         <value>http://tech.example.edu/hats#TeacherAssistant</value>
       </field>
     </x>
   </command>
 </iq>
 ]]></example>
-    <example caption='Service Informs Admin of Completion'><![CDATA[
+    <example caption='Room Informs Admin of Completion'><![CDATA[
 <iq from='physicsforpoets@courses.example.edu'
     id='9fens61z'
     to='professor@example.edu/office'
@@ -419,7 +419,7 @@
   </section2>
   <section2 topic='Removing a Hat' anchor='remove'>
     <p>The following flow shows how to remove a hat.</p>
-    <p>When the hat is removed service SHOULD broadcast the related JID presence with the refreshed hat list.</p>
+    <p>When the hat is removed, the room SHOULD broadcast the related JID presence with the refreshed hat list.</p>
     <example caption='Admin Requests to Remove a Hat'><![CDATA[
 <iq from='professor@example.edu/office'
     id='fdi3n2b6'
@@ -436,14 +436,14 @@
       <field var='hats#jid'>
         <value>terry.anderson@example.edu</value>
       </field>
-      <field var='hat'>
+      <field var='hats#uri'>
         <value>http://tech.example.edu/hats#TeacherAssistant</value>
       </field>
     </x>
   </command>
 </iq>
 ]]></example>
-    <example caption='Service Informs Admin of Completion'><![CDATA[
+    <example caption='Room Informs Admin of Completion'><![CDATA[
 <iq from='physicsforpoets@courses.example.edu'
     id='fdi3n2b6'
     to='professor@example.edu/office'
