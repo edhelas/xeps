@@ -105,64 +105,6 @@
 
 <p>If the requesting entity detects that, based on a mismatching hash, the localy stored hats list is considered outdated.</p>
 
-  <section2 topic='Listing Hats'>
-    <p>An entity might be interested to get all the existing hats available in a chatroom.</p>
-
-    <example caption='User’s client request the hats list configured on a MUC room'><![CDATA[
-<iq from='professor@example.edu/office'
-  id='fdi3n2b6'
-  to='physicsforpoets@courses.example.edu'
-  type='set'
-  xml:lang='en'>
-  <command xmlns='http://jabber.org/protocol/commands'
-          action='execute'
-          node='urn:xmpp:hats:commands:list'/>
-</iq>]]></example>
-    <example caption='Room returns the list of configured hats'><![CDATA[
-<iq from='physicsforpoets@courses.example.edu'
-    id='fdi3n2b6'
-    to='professor@example.edu/office'
-    type='result'
-    xml:lang='en'>
-  <command xmlns='http://jabber.org/protocol/commands'
-           node='urn:xmpp:hats:commands:list'
-           status='completed'
-           sessionid='A971D19A-2226-4DAD-B261-9D0886B9A026'>
-    <x xmlns='jabber:x:data' type='result'>
-      <title>Hats List</title>
-      <reported>
-        <field var='hats#title'/>
-        <field var='hats#uri'/>
-        <field var='hats#hue'/>
-      </reported>
-      <item>
-        <field var='hats#title'>
-            <value>Host</value>
-        </field>
-        <field var='hats#uri'>
-            <value>http://schemas.example.com/hats#host</value>
-        </field>
-        <field var='hats#hue'>
-            <value>327.255249</value>
-        </field>
-      </item>
-      <item>
-        <field var='hats#title'>
-            <value>Presenter</value>
-        </field>
-        <field var='hats#uri'>
-            <value>http://schemas.example.com/hats#presenter</value>
-        </field>
-        <field var='hats#hue'>
-            <value>171.430664</value>
-        </field>
-      </item>
-      …
-    </x>
-  </command>
-</iq>
-]]></example>
-  </section2>
 </section1>
 
 <section1 topic='Protocol' anchor='protocol'>
@@ -298,8 +240,48 @@
   </section2>
   <section2 topic='Destroying a Hat' anchor='destroy'>
     <p>The following flow shows how to destroy a hat and remove it from the list of available hats.</p>
+    <p>It first asks the formulary, which returns a list of all the available hats, and then actually requests to destroy one of them. Notice that alternatively, the client may send directly the query to destroy a hat without first requesting the formulary, as it already knows many hats that were received in presence stanzas.</p>
     <p>When a hat is destroyed, it is automatically removed from all the JIDs where it was assigned.</p>
     <p>The room SHOULD broadcast the related JID presences with the refreshed hats list.</p>
+    <example caption='Admin Requests Form to Destroy a Hat'><![CDATA[
+<iq from='professor@example.edu/office'
+    id='gd53a2b6'
+    to='physicsforpoets@courses.example.edu'
+    type='set'
+    xml:lang='en'>
+  <command xmlns='http://jabber.org/protocol/commands'
+           action='execute'
+           node='urn:xmpp:hats:commands:destroy'>
+  </command>
+</iq>
+]]></example>
+    <example caption='Room Provides Form to Destroy a Hat'><![CDATA[
+<iq from='physicsforpoets@courses.example.edu'
+    id='gd53a2b6'
+    to='professor@example.edu/office'
+    type='result'
+    xml:lang='en'>
+  <command xmlns='http://jabber.org/protocol/commands'
+            node='urn:xmpp:hats:commands:destroy'
+            sessionid='A971D19A-2226-4DAD-B261-9D0886B9A026'
+            status='executing'>
+    <x xmlns='jabber:x:data' type='form'>
+      <title>Destroying a Hat</title>
+      <instructions>Fill out this form to destroy a hat.</instructions>
+      <field type='hidden' var='FORM_TYPE'>
+        <value>urn:xmpp:hats:commands</value>
+      </field>
+      <field label='The role'
+             type='list-single'
+             var='hat'>
+        <option label='Teacher'><value>http://tech.example.edu/hats#Teacher</value></option>
+        <option label='Teacher&apos;s Assistant'><value>http://tech.example.edu/hats#TeacherAssistant</value></option>
+        <option label='Test Proctor'><value>http://tech.example.edu/hats#Proctor</value></option>
+      </field>
+    </x>
+  </command>
+</iq>
+]]></example>
     <example caption='Admin Requests to Destroy a Hat'><![CDATA[
 <iq from='professor@example.edu/office'
     id='rei4n2b0'
@@ -330,6 +312,63 @@
            node='urn:xmpp:hats:commands:destroy'
            sessionid='A971D19A-2226-4DAD-B261-7D0886B9A123'
            status='completed'/>
+</iq>
+]]></example>
+  </section2>
+  <section2 topic='Listing Hats'>
+    <p>An entity might be interested to get all the existing hats available in a chatroom.</p>
+    <example caption='User’s client request the hats list configured on a MUC room'><![CDATA[
+<iq from='professor@example.edu/office'
+  id='fdi3n2b6'
+  to='physicsforpoets@courses.example.edu'
+  type='set'
+  xml:lang='en'>
+  <command xmlns='http://jabber.org/protocol/commands'
+          action='execute'
+          node='urn:xmpp:hats:commands:list'/>
+</iq>]]></example>
+    <example caption='Room Returns the List of Configured Hats'><![CDATA[
+<iq from='physicsforpoets@courses.example.edu'
+    id='fdi3n2b6'
+    to='professor@example.edu/office'
+    type='result'
+    xml:lang='en'>
+  <command xmlns='http://jabber.org/protocol/commands'
+           node='urn:xmpp:hats:commands:list'
+           status='completed'
+           sessionid='A971D19A-2226-4DAD-B261-9D0886B9A026'>
+    <x xmlns='jabber:x:data' type='result'>
+      <title>Hats List</title>
+      <reported>
+        <field var='hats#title'/>
+        <field var='hats#uri'/>
+        <field var='hats#hue'/>
+      </reported>
+      <item>
+        <field var='hats#title'>
+            <value>Host</value>
+        </field>
+        <field var='hats#uri'>
+            <value>http://schemas.example.com/hats#host</value>
+        </field>
+        <field var='hats#hue'>
+            <value>327.255249</value>
+        </field>
+      </item>
+      <item>
+        <field var='hats#title'>
+            <value>Presenter</value>
+        </field>
+        <field var='hats#uri'>
+            <value>http://schemas.example.com/hats#presenter</value>
+        </field>
+        <field var='hats#hue'>
+            <value>171.430664</value>
+        </field>
+      </item>
+      …
+    </x>
+  </command>
 </iq>
 ]]></example>
   </section2>
@@ -453,6 +492,58 @@
            node='urn:xmpp:hats:commands:unassign'
            sessionid='A971D19A-2226-4DAD-B261-8D0886B9A026'
            status='completed'/>
+</iq>
+]]></example>
+  </section2>
+
+  <section2 topic='Listing Assigned Hats'>
+    <p>An entity might be interested to get all the hats assigned to users in a chatroom.</p>
+
+    <example caption='User’s client request the hats list assigned on a MUC room'><![CDATA[
+<iq from='professor@example.edu/office'
+  id='fdi3n2b6'
+  to='physicsforpoets@courses.example.edu'
+  type='set'
+  xml:lang='en'>
+  <command xmlns='http://jabber.org/protocol/commands'
+          action='execute'
+          node='urn:xmpp:hats:commands:list-assigned'/>
+</iq>]]></example>
+    <example caption='Room Returns the List of Assigned Hats'><![CDATA[
+<iq from='physicsforpoets@courses.example.edu'
+    id='fdi3n2b6'
+    to='professor@example.edu/office'
+    type='result'
+    xml:lang='en'>
+  <command xmlns='http://jabber.org/protocol/commands'
+           node='urn:xmpp:hats:commands:list-assigned'
+           status='completed'
+           sessionid='A971D19A-2226-4DAD-B261-9D0886B9A026'>
+    <x xmlns='jabber:x:data' type='result'>
+      <title>Assigned Hats List</title>
+      <reported>
+        <field var='hats#jid'/>
+        <field var='hats#uri'/>
+        <field var='hats#title'/>
+        <field var='hats#hue'/>
+      </reported>
+      <item>
+        <field var='hats#jid'>
+            <value>terry.anderson@example.edu</value>
+        </field>
+        <field var='hats#uri'>
+            <value>http://tech.example.edu/hats#TeacherAssistant</value>
+        </field>
+        <field var='hats#title'>
+            <value>Assistant</value>
+        </field>
+        <field var='hats#hue'>
+            <value>327.255249</value>
+        </field>
+      </item>
+      …
+    </x>
+  </command>
 </iq>
 ]]></example>
   </section2>
